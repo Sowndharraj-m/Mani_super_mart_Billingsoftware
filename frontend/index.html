@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mani Super Mart - POS System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>Mani Super Mart</h1>
+                <p>Fast Billing & POS System</p>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span id="current-time"></span>
+                    <span id="user-name">Staff</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Navigation -->
+        <nav class="main-nav">
+            <button class="nav-btn active" onclick="showTab('billing')">
+                <span class="icon">💳</span> Billing
+            </button>
+            <button class="nav-btn" onclick="showTab('customers')">
+                <span class="icon">👥</span> Customers
+            </button>
+            <button class="nav-btn" onclick="showTab('products')">
+                <span class="icon">📦</span> Products
+            </button>
+            <button class="nav-btn" onclick="showTab('discounts')">
+                <span class="icon">🏷️</span> Discounts
+            </button>
+            <button class="nav-btn" onclick="showTab('reports')">
+                <span class="icon">📊</span> Reports
+            </button>
+            <button class="nav-btn" onclick="showTab('settings')">
+                <span class="icon">⚙️</span> Settings
+            </button>
+        </nav>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- BILLING TAB -->
+            <div id="billing-tab" class="tab-content active">
+                <div class="billing-container">
+                    <!-- Left Side - Product Search & Selection -->
+                    <div class="left-panel">
+                        <div class="search-section">
+                            <h2>Add Items</h2>
+                            <div class="search-input-group">
+                                <input type="text" id="product-search" placeholder="Search by name or barcode..." 
+                                       class="search-input" onkeyup="searchProducts()">
+                                <input type="text" id="barcode-input" placeholder="Scan barcode..." 
+                                       class="barcode-input" onkeypress="handleBarcodeInput(event)">
+                            </div>
+                            <div id="search-results" class="search-results"></div>
+                        </div>
+
+                        <!-- Quick Categories -->
+                        <div class="categories-section">
+                            <h3>Quick Categories</h3>
+                            <div class="category-buttons">
+                                <button class="cat-btn" onclick="filterByCategory('Dairy')">Dairy</button>
+                                <button class="cat-btn" onclick="filterByCategory('Bakery')">Bakery</button>
+                                <button class="cat-btn" onclick="filterByCategory('Grains')">Grains</button>
+                                <button class="cat-btn" onclick="filterByCategory('Meat')">Meat</button>
+                                <button class="cat-btn" onclick="filterByCategory('Vegetables')">Vegetables</button>
+                                <button class="cat-btn" onclick="filterByCategory('Fruits')">Fruits</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Side - Bill -->
+                    <div class="right-panel">
+                        <!-- Bill Header -->
+                        <div class="bill-header">
+                            <h2>Current Bill</h2>
+                            <div class="bill-actions">
+                                <button class="action-btn hold-btn" onclick="holdBill()" title="Hold Bill">
+                                    ⏸️ Hold
+                                </button>
+                                <button class="action-btn clear-btn" onclick="clearBill()" title="Clear Bill">
+                                    🗑️ Clear
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Bill Number -->
+                        <div class="bill-number">
+                            <span>Bill #:</span>
+                            <span id="bill-number">NEW</span>
+                        </div>
+
+                        <!-- Customer Info -->
+                        <div class="customer-section">
+                            <h3>Customer</h3>
+                            <div class="customer-input-group">
+                                <input type="text" id="customer-mobile" placeholder="Enter mobile number..." 
+                                       class="customer-input" onkeyup="searchCustomer()">
+                                <span id="customer-name" class="customer-name">Walk-in Customer</span>
+                            </div>
+                        </div>
+
+                        <!-- Bill Items -->
+                        <div class="bill-items-section">
+                            <h3>Items</h3>
+                            <table class="bill-items-table">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Qty</th>
+                                        <th>Price</th>
+                                        <th>Discount</th>
+                                        <th>Total</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bill-items-body">
+                                    <tr class="empty-row">
+                                        <td colspan="6" class="empty-message">No items added yet</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Bill Summary -->
+                        <div class="bill-summary">
+                            <div class="summary-row">
+                                <span>Subtotal:</span>
+                                <span id="subtotal">₹0.00</span>
+                            </div>
+                            <div class="summary-row">
+                                <input type="text" id="coupon-code" placeholder="Enter coupon code..." 
+                                       class="coupon-input">
+                                <button class="apply-btn" onclick="applyCoupon()">Apply</button>
+                            </div>
+                            <div class="summary-row" id="discount-row" style="display:none;">
+                                <span>Discount:</span>
+                                <span id="discount">-₹0.00</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Tax (5%):</span>
+                                <span id="tax">₹0.00</span>
+                            </div>
+                            <div class="summary-row total">
+                                <span>Total:</span>
+                                <span id="total">₹0.00</span>
+                            </div>
+                        </div>
+
+                        <!-- Payment Section -->
+                        <div class="payment-section">
+                            <h3>Payment Mode</h3>
+                            <div class="payment-options">
+                                <button class="payment-btn active" onclick="selectPayment('cash')">💵 Cash</button>
+                                <button class="payment-btn" onclick="selectPayment('upi')">📱 UPI</button>
+                                <button class="payment-btn" onclick="selectPayment('card')">💳 Card</button>
+                                <button class="payment-btn" onclick="selectPayment('wallet')">👛 Wallet</button>
+                                <button class="payment-btn" onclick="selectPayment('split')">🔀 Split</button>
+                            </div>
+
+                            <!-- Payment Details -->
+                            <div id="upi-details" class="payment-details" style="display:none;">
+                                <input type="text" placeholder="UPI ID or Phone" class="payment-input">
+                            </div>
+                            <div id="card-details" class="payment-details" style="display:none;">
+                                <input type="text" placeholder="Card Reference Number" class="payment-input">
+                            </div>
+                            <div id="wallet-details" class="payment-details" style="display:none;">
+                                <input type="text" placeholder="Wallet Mobile Number" class="payment-input">
+                            </div>
+                            <div id="split-details" class="payment-details" style="display:none;">
+                                <div class="split-input-group">
+                                    <input type="number" id="cash-amount" placeholder="Cash amount" class="payment-input">
+                                    <input type="number" id="other-amount" placeholder="Other mode amount" class="payment-input">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <button class="btn btn-complete" onclick="completeBill()">✓ Complete Sale</button>
+                            <button class="btn btn-return" onclick="showReturnDialog()">↩️ Return</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CUSTOMERS TAB -->
+            <div id="customers-tab" class="tab-content">
+                <div class="section-header">
+                    <h2>Customer Management</h2>
+                    <button class="btn btn-primary" onclick="showAddCustomerForm()">+ Add Customer</button>
+                </div>
+
+                <div class="customers-container">
+                    <!-- Search Customers -->
+                    <div class="search-box">
+                        <input type="text" id="customer-search" placeholder="Search by name or mobile..." 
+                               onkeyup="searchAllCustomers()">
+                    </div>
+
+                    <!-- Customer List -->
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Mobile</th>
+                                <th>Total Purchases</th>
+                                <th>Loyalty Points</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customers-body">
+                            <tr>
+                                <td colspan="5" class="empty-message">Loading customers...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Add/Edit Customer Modal -->
+                <div id="customer-modal" class="modal" style="display:none;">
+                    <div class="modal-content">
+                        <span class="close" onclick="closeCustomerModal()">&times;</span>
+                        <h2>Add New Customer</h2>
+                        <form class="form-group" onsubmit="saveCustomer(event)">
+                            <input type="text" id="cust-name" placeholder="Name" required>
+                            <input type="tel" id="cust-mobile" placeholder="Mobile Number" required>
+                            <input type="email" id="cust-email" placeholder="Email (optional)">
+                            <button type="submit" class="btn btn-primary">Save Customer</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRODUCTS TAB -->
+            <div id="products-tab" class="tab-content">
+                <div class="section-header">
+                    <h2>Product Management</h2>
+                    <button class="btn btn-primary" onclick="showAddProductForm()">+ Add Product</button>
+                </div>
+
+                <div class="products-container">
+                    <!-- Search Products -->
+                    <div class="search-box">
+                        <input type="text" id="product-search-tab" placeholder="Search products..." 
+                               onkeyup="searchProductsTab()">
+                    </div>
+
+                    <!-- Products Table -->
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Barcode</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-body">
+                            <tr>
+                                <td colspan="7" class="empty-message">Loading products...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Add/Edit Product Modal -->
+                <div id="product-modal" class="modal" style="display:none;">
+                    <div class="modal-content">
+                        <span class="close" onclick="closeProductModal()">&times;</span>
+                        <h2>Add New Product</h2>
+                        <form class="form-group" onsubmit="saveProduct(event)">
+                            <input type="text" id="prod-barcode" placeholder="Barcode" required>
+                            <input type="text" id="prod-name" placeholder="Product Name" required>
+                            <input type="text" id="prod-category" placeholder="Category" required>
+                            <input type="number" id="prod-price" placeholder="Price" step="0.01" required>
+                            <input type="number" id="prod-quantity" placeholder="Quantity" required>
+                            <input type="number" id="prod-reorder" placeholder="Reorder Level" required>
+                            <button type="submit" class="btn btn-primary">Save Product</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DISCOUNTS TAB -->
+            <div id="discounts-tab" class="tab-content">
+                <div class="discounts-container">
+                    <div class="discount-section">
+                        <div class="section-header">
+                            <h2>Coupons</h2>
+                            <button class="btn btn-primary" onclick="showAddCouponForm()">+ Add Coupon</button>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Discount</th>
+                                    <th>Min Purchase</th>
+                                    <th>Uses</th>
+                                    <th>Valid Till</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="coupons-body">
+                                <tr>
+                                    <td colspan="6" class="empty-message">Loading coupons...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="discount-section">
+                        <div class="section-header">
+                            <h2>Offers</h2>
+                            <button class="btn btn-primary" onclick="showAddOfferForm()">+ Add Offer</button>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Discount</th>
+                                    <th>Valid From</th>
+                                    <th>Valid Till</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="offers-body">
+                                <tr>
+                                    <td colspan="6" class="empty-message">Loading offers...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Add Coupon Modal -->
+                <div id="coupon-modal" class="modal" style="display:none;">
+                    <div class="modal-content">
+                        <span class="close" onclick="closeCouponModal()">&times;</span>
+                        <h2>Add New Coupon</h2>
+                        <form class="form-group" onsubmit="saveCoupon(event)">
+                            <input type="text" id="coup-code" placeholder="Coupon Code" required>
+                            <select id="coup-type" required>
+                                <option>Discount Type</option>
+                                <option value="percentage">Percentage</option>
+                                <option value="fixed">Fixed Amount</option>
+                            </select>
+                            <input type="number" id="coup-value" placeholder="Discount Value" step="0.01" required>
+                            <input type="number" id="coup-min" placeholder="Minimum Purchase" step="0.01">
+                            <input type="number" id="coup-max" placeholder="Max Uses">
+                            <input type="datetime-local" id="coup-from" required>
+                            <input type="datetime-local" id="coup-till" required>
+                            <button type="submit" class="btn btn-primary">Save Coupon</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Add Offer Modal -->
+                <div id="offer-modal" class="modal" style="display:none;">
+                    <div class="modal-content">
+                        <span class="close" onclick="closeOfferModal()">&times;</span>
+                        <h2>Add New Offer</h2>
+                        <form class="form-group" onsubmit="saveOffer(event)">
+                            <input type="text" id="off-name" placeholder="Offer Name" required>
+                            <select id="off-type" required>
+                                <option>Offer Type</option>
+                                <option value="bogo">Buy One Get One (BOGO)</option>
+                                <option value="happyhour">Happy Hour</option>
+                                <option value="category_discount">Category Discount</option>
+                            </select>
+                            <input type="number" id="off-discount" placeholder="Discount Value" step="0.01" required>
+                            <input type="number" id="off-min-qty" placeholder="Minimum Quantity">
+                            <input type="datetime-local" id="off-from" required>
+                            <input type="datetime-local" id="off-till" required>
+                            <button type="submit" class="btn btn-primary">Save Offer</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORTS TAB -->
+            <div id="reports-tab" class="tab-content">
+                <div class="reports-container">
+                    <div class="section-header">
+                        <h2>Sales Reports</h2>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Today's Sales</h3>
+                            <div class="stat-value" id="today-sales">₹0.00</div>
+                            <p>Transactions: <span id="today-count">0</span></p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Avg Bill</h3>
+                            <div class="stat-value" id="avg-bill">₹0.00</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Customers</h3>
+                            <div class="stat-value" id="total-customers">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Products</h3>
+                            <div class="stat-value" id="total-products">0</div>
+                        </div>
+                    </div>
+
+                    <div class="reports-section">
+                        <h3>Held Bills</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Bill #</th>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="held-bills-body">
+                                <tr>
+                                    <td colspan="5" class="empty-message">No held bills</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="reports-section">
+                        <h3>Low Stock Products</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Current Stock</th>
+                                    <th>Reorder Level</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="low-stock-body">
+                                <tr>
+                                    <td colspan="4" class="empty-message">All products in stock</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SETTINGS TAB -->
+            <div id="settings-tab" class="tab-content">
+                <div class="settings-container">
+                    <h2>Settings</h2>
+                    
+                    <div class="settings-section">
+                        <h3>System Settings</h3>
+                        <div class="setting-item">
+                            <label>Tax Rate (%)</label>
+                            <input type="number" id="tax-rate" value="5" step="0.1">
+                        </div>
+                        <div class="setting-item">
+                            <label>Business Name</label>
+                            <input type="text" id="business-name" value="Mani Super Mart">
+                        </div>
+                        <div class="setting-item">
+                            <label>Business Mobile</label>
+                            <input type="tel" id="business-mobile" value="">
+                        </div>
+                        <div class="setting-item">
+                            <label>Business Address</label>
+                            <textarea id="business-address"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>Database</h3>
+                        <button class="btn btn-primary" onclick="initializeDatabase()">Initialize Database</button>
+                        <button class="btn btn-danger" onclick="confirmReset()">Reset All Data</button>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Return Dialog -->
+    <div id="return-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeReturnDialog()">&times;</span>
+            <h2>Return/Exchange Bill</h2>
+            <div class="form-group">
+                <label>Select Bill to Return:</label>
+                <input type="text" id="return-bill-search" placeholder="Search bill number..." onkeyup="searchBillsForReturn()">
+                <div id="return-bills-list" class="bills-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
