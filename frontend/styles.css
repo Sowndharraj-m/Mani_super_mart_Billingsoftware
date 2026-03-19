@@ -221,11 +221,11 @@ body {
 
 /* Categories */
 .categories-section h3 {
-    font-size: 14px;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    font-weight: 600;
-    color: var(--dark-color);
+    font-size: 20px;
+    margin-bottom: 20px;
+    text-transform: lowercase;
+    font-weight: 800;
+    color: yellowgreen;
 }
 
 .category-buttons {
